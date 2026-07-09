@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Biochar Calculator + Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {font-family: Arial; background: linear-gradient(to right, #e0f7fa, #e8f5e9); margin: 0;}
+        header {background: #2e7d32; color: white; text-align: center; padding: 20px;}
+        .container {max-width: 700px; margin: 20px auto; background: white; padding: 20px; border-radius: 10px;}
+        input {width: 100%; padding: 8px; margin-top: 10px;}
+        button {margin-top: 15px; padding: 10px; width: 100%; background: #43a047; color: white; border: none; border-radius: 5px; cursor: pointer;}
+        table {width: 100%; margin-top: 20px; border-collapse: collapse;}
+        table, th, td {border: 1px solid #ccc;}
+        th, td {padding: 8px; text-align: center;}
+        canvas {margin-top: 30px;}
+        img {width: 100%; border-radius: 10px; margin-bottom: 15px;}
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🌱 Biochar Efficiency Tracker</h1>
+</header>
+
+<div class="container">
+
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/Biochar.jpg">
+
+    <h3>Công thức: H = (M₂ − M₀) / (M₁ − M₀) × 100</h3>
+
+    <input type="number" id="m0" placeholder="M₀ - Cốc rỗng">
+    <input type="number" id="m1" placeholder="M₁ - Trước nung">
+    <input type="number" id="m2" placeholder="M₂ - Sau nung">
+
+    <button onclick="addData()">➕ Thêm dữ liệu</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Lần</th>
+                <th>M₀</th>
+                <th>M₁</th>
+                <th>M₂</th>
+                <th>Hiệu suất (%)</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <canvas id="chart"></canvas>
+
+</div>
+
+<script>
+let dataList = [];
+let chart;
+
+function calculate(m0, m1, m2) {
+    return ((m2 - m0) / (m1 - m0)) * 100;
+}
+
+function addData() {
+    let m0 = parseFloat(document.getElementById("m0").value);
+    let m1 = parseFloat(document.getElementById("m1").value);
+    let m2 = parseFloat(document.getElementById("m2").value);
+
+    if (isNaN(m0) || isNaN(m1) || isNaN(m2) || m1 <= m0) {
+        alert("Dữ liệu không hợp lệ!");
+        return;
+    }
+
+    let h = calculate(m0, m1, m2);
+
+    dataList.push({
+        m0, m1, m2, h: h.toFixed(2)
+    });
+
+    renderTable();
+    renderChart();
+}
+
+function renderTable() {
+    let tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    dataList.forEach((d, i) => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${i+1}</td>
+                <td>${d.m0}</td>
+                <td>${d.m1}</td>
+                <td>${d.m2}</td>
+                <td>${d.h}</td>
+            </tr>
+        `;
+    });
+}
+
+function renderChart() {
+    let labels = dataList.map((_, i) => "Lần " + (i+1));
+    let values = dataList.map(d => d.h);
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(document.getElementById("chart"), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Hiệu suất (%)',
+                data: values,
+                borderColor: 'green',
+                fill: false,
+                tension: 0.3
+            }]
+        }
+    });
+}
+</script>
+
+</body>
+</html>
